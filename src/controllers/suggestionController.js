@@ -48,7 +48,8 @@ export const getSuggestions = async (req, res) => {
     const suggestions = await Suggestion.find(filter).sort({ createdAt: -1 });
     res.json(suggestions);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Get Suggestions Error:", error);
+    res.status(500).json({ message: error.message, stack: error.stack });
   }
 };
 
