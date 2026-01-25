@@ -17,13 +17,31 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: "*", // Allow all for now, lock down in prod
-    methods: ["GET", "POST"]
+    origin: "*", 
+    methods: ["GET", "POST"],
+    credentials: true
   }
 });
 
 // Middleware
-app.use(cors());
+// Middleware
+const allowedOrigins = [
+  'https://lifepath-bot.vercel.app', 
+  'http://localhost:5173',
+  'http://localhost:5000'
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log('Blocked by CORS:', origin);
+      callback(null, true); // Temporarily allow all for debugging if strict fails, or fail: callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
 app.use(express.json());
 
 // Routes

@@ -33,7 +33,8 @@ export const syncUser = async (req, res) => {
 
     res.status(201).json(user);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error("Sync User Error:", error);
+    res.status(400).json({ message: error.message, stack: error.stack });
   }
 };
 
