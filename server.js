@@ -24,19 +24,21 @@ const io = new Server(httpServer, {
 });
 
 // Middleware
-// Middleware
-const allowedOrigins = [
-  'https://lifepath-bot.vercel.app', 
-  'http://localhost:5173',
-  'http://localhost:5000'
-];
-
+// Middleware (Permissive CORS for debugging)
 app.use(cors({
-  origin: allowedOrigins,
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  credentials: true 
 }));
+app.options('*', cors()); // Enable pre-flight for all routes
+
 app.use(express.json());
+
+// Health Check
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'OK', message: 'Backend is reachable', timestamp: new Date() });
+});
 
 // Routes
 app.use('/api/users', userRoutes);
