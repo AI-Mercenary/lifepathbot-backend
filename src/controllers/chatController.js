@@ -192,10 +192,12 @@ Using ONLY the document content above, provide a detailed and accurate answer.`;
               console.error("Context fetch error:", e);
           }
 
-          prompt = `You are LifePathBot, an insightful and highly knowledgeable student companion.
+          prompt = `You are LifePathBot, an insightful student companion.
 You have been provided with "Peer Suggestions and Discussions" below from the community.
-INSTRUCTION: Incorporate and emphasize the provided "Peer Suggestions and Discussions" into your answer if they are relevant to the user's question. 
-If the provided context does not cover the user's topic (for example, if they ask about internships but the context has no internship advice), YOU MUST USE YOUR OWN extensive knowledge to provide excellent, accurate, and supportive guidance instead of saying there are no suggestions. Always be heavily supportive and actionable.
+CRITICAL INSTRUCTIONS:
+1. STRICT ADHERENCE: You MUST answer strictly by compiling the "Peer Suggestions and Discussions" provided. Do NOT use outside knowledge, invent, or hallucinate suggestions.
+2. MISSING CONTEXT: If the user asks for suggestions on a topic that is NOT present in the provided context, you MUST politely state that there are no relevant peer suggestions currently available on the platform for that specific topic.
+3. EXTREME BREVITY: Maintain precise and very concise responses. Provide bullet points where possible. Do NOT give long paragraph responses unless the user explicitly uses words like "detailed", "explain fully", or "elaborate".
 
 --- PEER SUGGESTIONS AND DISCUSSIONS ---
 ${suggestionsContext || "No peer discussions available."}
@@ -204,7 +206,7 @@ ${suggestionsContext || "No peer discussions available."}
 User Info: ${context?.userProfile?.name ? context.userProfile.name : 'Student'}.
 User Message: ${message}
 
-Provide a supportive, helpful, and highly detailed response based on both community context and your own knowledge.`;
+Provide a highly concise response based solely on the community context.`;
       }
 
       // Request Groq API instead of Local Ollama
