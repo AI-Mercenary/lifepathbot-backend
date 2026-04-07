@@ -1,12 +1,22 @@
 import mongoose from 'mongoose';
 
+const suggestionAnswerSchema = new mongoose.Schema({
+  firebaseUid: String,
+  authorName: String,
+  text: { type: String, required: true },
+  upvotes: { type: Number, default: 0 },
+  createdAt: { type: Date, default: Date.now }
+});
+
 const suggestionSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: false
   },
   authorName: String, // Snapshot of name for easier display
+  branch: { type: String, default: "General" },
+  year: { type: String, default: "1" },
   title: {
     type: String,
     required: true
@@ -17,18 +27,8 @@ const suggestionSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    enum: [
-      'Hackathons', 'hackathons',
-      'Academics', 'academics',
-      'Courses', 'courses',
-      'Internships', 'internships',
-      'Careers', 'careers',
-      'Projects', 'projects',
-      'Tips & Tricks', 'tips', 'Tips', // accommodating variations
-      'General', 'general'
-    ],
     required: true,
-    default: 'General'
+    default: 'academics'
   },
   tags: [String],
   status: {
@@ -40,6 +40,7 @@ const suggestionSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  answers: [suggestionAnswerSchema],
   createdAt: {
     type: Date,
     default: Date.now

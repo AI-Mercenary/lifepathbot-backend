@@ -13,7 +13,9 @@ export const syncUser = async (req, res) => {
       // Update existing user
       user.name = name || user.name;
       user.email = email || user.email;
-      user.role = role || user.role;
+      if (user.role !== 'admin' || role === 'admin') {
+          user.role = role || user.role;
+      }
       // Don't overwrite preferences or other fields blindly
       await user.save();
       return res.json(user);
@@ -62,5 +64,14 @@ export const updateProfile = async (req, res) => {
     }
   } catch (error) {
     res.status(400).json({ message: error.message });
+  }
+};
+
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({}).sort({ createdAt: -1 });
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

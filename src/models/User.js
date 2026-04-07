@@ -16,8 +16,8 @@ const userSchema = new mongoose.Schema({
     unique: true
   },
   student_id: String,
-  age: Number,
   dept: String,
+  year: { type: String, default: "1" },
   specialization: String,
   role: {
     type: String,
