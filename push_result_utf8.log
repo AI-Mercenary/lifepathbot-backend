@@ -1,0 +1,40 @@
+﻿git : remote: error: 
+Trace: 8042c307d2f7f1d945cb
+98226a90520f2ab36782e032c78
+4ee363fee9e4e608f        
+At line:1 char:1
++ git push origin main > 
+push_result.log 2>&1 ; cat 
+push_result.log
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
+    + CategoryInfo         
+     : NotSpecified: (rem  
+  ote: error: ...e4e608f   
+         :String) [], R    
+emoteException
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+remote: error: See 
+https://gh.io/lfs for more 
+information.        
+remote: error: File 
+OllamaSetup.exe is 1204.77 
+MB; this exceeds GitHub's 
+file size limit of 100.00 
+MB        
+remote: error: GH001: 
+Large files detected. You 
+may want to try Git Large 
+File Storage - https://git-
+lfs.github.com.        
+To https://github.com/AI-Me
+rcenary/lifepathbot-backend
+ ! [remote rejected] main 
+-> main (pre-receive hook 
+declined)
+error: failed to push some 
+refs to 'https://github.com
+/AI-Mercenary/lifepathbot-b
+ackend'

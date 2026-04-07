@@ -1,0 +1,41 @@
+﻿commit 44f28952905066386c541a770f1b4f26d3373e33
+Author: AI-Mercenary <sampathvarma349@gmail.com>
+Date:   Tue Apr 7 22:51:45 2026 +0530
+
+    Prevent unhandled db exception from crashing process entirely
+
+M	src/config/db.js
+
+commit dd70a45aceaf7e2c5822e638cdf8c7d93cead611
+Author: AI-Mercenary <sampathvarma349@gmail.com>
+Date:   Tue Apr 7 22:33:42 2026 +0530
+
+    Add student branch and year identification to Suggestions
+
+M	src/controllers/suggestionController.js
+M	src/models/Suggestion.js
+M	src/models/User.js
+
+commit d72bbebdcc35d5f347901cf6180f9d122f5fa669
+Author: AI-Mercenary <sampathvarma349@gmail.com>
+Date:   Mon Apr 6 20:48:49 2026 +0530
+
+    Use native CORS mapping
+
+M	server.js
+
+commit 73d04f55f89fa7942c79ba750f98db32c5100725
+Author: AI-Mercenary <sampathvarma349@gmail.com>
+Date:   Mon Apr 6 20:41:10 2026 +0530
+
+    Update server.js for robust manual CORS header handling
+
+M	server.js
+
+commit 81a57fb035a714388f5420c19072886f15415ebf
+Author: AI-Mercenary <sampathvarma349@gmail.com>
+Date:   Mon Apr 6 20:26:05 2026 +0530
+
+    Fix CORS configuration for deployment domains
+
+M	server.js
