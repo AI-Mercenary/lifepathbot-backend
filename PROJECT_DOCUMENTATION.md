@@ -1,167 +1,453 @@
-# Student LifePath Bot - Project Documentation
+# LifePathBot — Complete Project Documentation
 
-## 1. Project Overview & Problem Statement
-
-### Problem Statement
-
-Many college students face challenges in organizing their routines, tracking personal and academic goals, and staying motivated amid busy schedules and competing demands. Most available tools either lack meaningful personalization or require students to use multiple disconnected apps, which reduces engagement and leads to inconsistent self-improvement. Furthermore, generic chatbot solutions rarely provide context-aware, actionable feedback tailored to a student’s evolving needs and mindset. This results in missed opportunities for effective goal-setting, reflection, and long-term growth.
-
-There is a clear need for an **intelligent, interactive platform** that can help students reflect on their activities, set and achieve goals, and receive supportive, adaptive suggestions—making self-development more practical and effective for the student community.
-
-### Objectives
-
-1.  **Reflection & Goal Setting**: Design and implement an intelligent, user-friendly platform that enables college students to reflect on their daily routines and set effective SMART (Specific, Measurable, Achievable, Relevant, Time-bound) goals.
-2.  **Context-Aware NLP Chatbot**: Utilize advanced natural language processing (NLP) to analyze student reflections and provide context-aware, personalized suggestions for self-improvement and motivation using a customized **Small Language Model (SLM)** approach without reliance on external paid APIs.
-3.  **Adaptive Multi-Agent System**: Develop a system that adapts recommendations based on individual progress, mood trends, and behavioral patterns (e.g., Goal Coach, Motivator, Analyst).
-4.  **Admin & Safety Workflow**: Integrate an admin approval workflow to review and ensure the safety, appropriateness, and quality of feedback and uploaded resources.
-5.  **Analytics & Visualization**: Monitor and visualize user progress through analytics dashboards, supporting sustained engagement, self-awareness, and long-term personal growth.
+> An AI-powered peer-mentorship and academic guidance platform for students.
+> Built for review-readiness with a clear module breakdown of both frontend and backend.
 
 ---
 
-## 2. Methodology & Algorithms
-
-The core innovation of this project is the shift from generic Large Language Models (LLMs) to a domain-specific, privacy-first **Small Language Model (SLM)** architecture. This approach ensures low latency, high accuracy, and zero dependence on external APIs, running entirely within the hosted environment.
-
-### A. Core Architecture: The "SLM" Pipeline
-
-Instead of a single black-box neural network, our "SLM" is a composed pipeline of linguistic and probabilistic algorithms designed to "understand" and retrieve information with 100% hallucinogenic-free accuracy.
-
-#### 1. Ingestion & Structural Parsing
-
-- **Library**: `pdfplumber`
-- **Process**: Converts raw binary PDF data (textbooks, notes, university guidelines) into structured text. It preserves hierarchy (Headings vs. Body text) to maintain context, which is crucial for answering academic queries accurately.
-
-#### 2. Linguistic Processing (NLP Engine)
-
-- **Libraries**: `nltk` (Natural Language Toolkit), `spacy`
-- **Tokenization**: The raw text is broken down into semantic units (tokens). We employ custom tokenizers to handle academic terminology.
-- **Lemmatization**: Tokens are reduced to their root form (e.g., "studying" $\rightarrow$ "study") using WordNetLemmatizer. This allows the model to match concepts even if different phrasings are used.
-- **Stopword Filtering**: Noise words (and, the, is) are removed to focus the engine on high-value semantic keywords.
-
-#### 3. Probabilistic Ranking Engine (The "Brain")
-
-- **Algorithm**: **Okapi BM25 (Best Matching 25)**
-- **Why BM25?**: Unlike simple keyword matching, BM25 uses a probabilistic model to estimate relevance.
-  - **TF-IDF Principle**: It weighs terms by rarity (IDF) and frequency (TF).
-  - **Saturation**: It applies a saturation curve, so mentioning a keyword 100 times isn't 100x better than mentioning it 5 times, mimicking human relevance perception.
-- **Implementation**: A custom Inverted Index maps every unique token to its location in the corpus, allowing sub-millisecond retrieval speeds even with large document sets.
-
-#### 4. Sentence Selection & Answer Composition
-
-- **Logic**: Once the most relevant paragraphs are retrieved via BM25, the **Sentence Selector** module analyzes the query type (Information vs. Explanation) and extracts the most pertinent sentences.
-- **Result**: A constructed answer that cites its source directly (e.g., "According to Page 12 of the Handbook..."), ensuring trust and verifiability.
-
-### B. Frontend-Backend Integration
-
-- **Frontend**: React.js with TypeScript and Vite. Uses a modern component library (Shadcn/UI + Tailwind CSS) for a premium, responsive experience.
-- **Backend**:
-  - **Node.js/Express**: Handles user authentication, database interactions (MongoDB), and API routing.
-  - **Python Engine**: Hosts the NLP/SLM logic, processing document uploads and query requests.
+## Table of Contents
+1. [Project Overview](#1-project-overview)
+2. [Tech Stack](#2-tech-stack)
+3. [Architecture Diagram](#3-architecture-diagram)
+4. [Frontend Documentation](#4-frontend-documentation)
+   - [Pages / Screens](#41-pages--screens)
+   - [State & API Layer](#42-state--api-layer)
+   - [Component System](#43-component-system)
+   - [Routing & Deployment Config](#44-routing--deployment-config)
+5. [Backend Documentation](#5-backend-documentation)
+   - [Entry Point](#51-entry-point--serverjs)
+   - [Routing Module](#52-routing-module-srcroutesr)
+   - [Controller Module (AI & Logic)](#53-controller-module-srccontrollers)
+   - [Database Schema Module](#54-database-schema-module-srcmodels)
+   - [Config Module](#55-config-module-srcconfig)
+6. [API Reference](#6-api-reference)
+7. [Features](#7-features)
+8. [Environment Variables](#8-environment-variables)
+9. [Deployment Guide](#9-deployment-guide)
+10. [Troubleshooting](#10-troubleshooting)
 
 ---
 
-## 3. Feedback & Actions Taken
+## 1. Project Overview
 
-| Feedback / Requirement from Guide                                                            | Action Taken                                                                                                                                          | Implementation Status            |
-| :------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------- |
-| **"Modify existing chatbot for personalized feedback and enable user upload of PDF/files."** | Integrated `pdfplumber` for PDF parsing and created a document processing pipeline in the Python backend.                                             | ✅ **Completed** (Backend Logic) |
-| **"Extract content and answer questions based on that PDF... using SLM."**                   | Implemented a custom SLM pipeline using `nltk` for NLP and `rank-bm25` for retrieval, replacing generic chat responses for document queries.          | ✅ **Completed**                 |
-| **"No APIs must be used and all only NLP based... faster more context aware."**              | Removed dependency on external LLM APIs for the core document Q&A features. Built a local Inverted Index and BM25 Ranker that runs on the server CPU. | ✅ **Completed**                 |
-| **"Add discussions page where AI monitors and gives suggestions."**                          | Created a specific `Discussions.tsx` page. The backend `suggestionRoutes` are set up to handle these interactions.                                    | 🔄 **In Progress** (Integration) |
+LifePathBot is a full-stack web application that provides students with:
+- **AI Chat Assistant** — A dual-mode chatbot (General Mode & Study Mode) powered by the Groq API.
+- **Community Hub (Suggestions)** — A peer-driven advice board where seniors share guidance on domains (Hackathons, Placements, Internships, etc.).
+- **Goal & Reflection Tracking** — Students can set SMART goals and log daily reflections.
+- **Admin Dashboard** — Admins moderate suggestions, view users, monitor chat logs, and bulk-import suggestions from Google Forms CSV/XLSX exports.
 
----
-
-## 4. Status of Implementation
-
-### Objective 1: Reflection & SMART Goals
-
-A dedicated module for students to log daily reflections and set structured goals.
-
-- **Implementation Details**:
-  - **Frontend**: `Reflections.tsx`, `Goals.tsx`, `GoalReflection.tsx`.
-  - **Data Structure**: MongoDB collections for `goals` (tracking title, deadline, progress) and `reflections` (mood, text, date).
-  - **Features**:
-    - Interactive mood selector.
-    - Step-by-step SMART goal wizard.
-    - Progress bars and deadline tracking.
-
-**[Insert Screenshot of Goal Setting Interface Here]**
-_(Shows the "Set a New Goal" modal with Specific, Measurable descriptions)_
-
-**[Insert Screenshot of Daily Reflection Log Here]**
-_(Shows the mood tracking and reflection text entry)_
+| Attribute | Value |
+|---|---|
+| Frontend URL | https://lifepath-bot.vercel.app |
+| Backend URL | https://lifepathbot-backend-ai-mercenary5381-vc27i7u0.leapcell.dev |
+| Frontend Repo | `AI-Mercenary/lifepathbot-frontend` |
+| Backend Repo | `AI-Mercenary/lifepathbot-backend` |
 
 ---
 
-### Objective 2: NLP Chatbot (SLM Based)
+## 2. Tech Stack
 
-The core intelligence engine that processes student queries against uploaded academic material.
+### Frontend
+| Layer | Technology |
+|---|---|
+| Framework | React + Vite (TypeScript) |
+| Styling | Tailwind CSS + shadcn/ui |
+| State Management | React Context API |
+| Auth | Firebase Authentication (Google + Email/Password) |
+| Icons | Lucide React + MUI Icons |
+| HTTP | Native `fetch` API |
+| Hosting | Vercel |
 
-- **Implementation Details**:
-  - **Backend**: `app/main.py`, `app/nlp_engine`, `app/qa_engine`.
-  - **Logic**:
-    1.  User uploads PDF $\rightarrow$ `PDFExtractor` parses text.
-    2.  System builds `InvertedIndex`.
-    3.  User asks question $\rightarrow$ `Tokenizer` cleans query $\rightarrow$ `Retriever` fetches top 5 paragraphs using BM25.
-    4.  `AnswerComposer` formulates response.
-  - **UI Integration**: `Chat.tsx` handles the chat interface, displaying user vs. bot messages with "Thinking..." states.
-
-**[Insert Screenshot of Chat Interface with "Thinking..." Indicator]**
-_(Chat window showing a user question and the bot's structured response)_
-
-**[Insert Screenshot of Document Upload & Processing]**
-_(Sidebar or Modal showing PDF upload status: "Processed 15 pages...")_
-
----
-
-### Objective 3: Multi-Agent System
-
-A specialized set of personas to handle different aspects of student life.
-
-- **Implementation Details**:
-  - **Agents Defined**:
-    - **Goal Coach**: Focuses on academic milestones.
-    - **Motivator**: Provides encouragement and quotes.
-    - **Reflector**: Prompts deep thought about daily activities.
-  - **Architecture**: The system routes queries to different effective prompts/logic paths based on the selected agent in `Chat.tsx`.
-  - **State**: The frontend `AGENTS` constant defines these personas, and `detectIntent` (in `lib/gemini.ts` bridging to local logic) determines routing.
-
-**[Insert Screenshot of Agent Selection Dropdown]**
-_(Shows "LifePath Bot", "Goal Coach", "Motivator" options in the chat header)_
+### Backend
+| Layer | Technology |
+|---|---|
+| Runtime | Node.js (ES Modules) |
+| Framework | Express.js |
+| AI Engine | Groq API (`llama-3.3-70b-versatile`) |
+| Database | MongoDB Atlas via Mongoose |
+| Auth Verification | Firebase Admin SDK |
+| File Parsing | `pdfjs-dist`, `xlsx` |
+| Real-time | Socket.io |
+| Hosting | Leapcell |
 
 ---
 
-### Objective 4: Admin Approval Workflow
+## 3. Architecture Diagram
 
-Ensures quality and safety of shared content.
-
-- **Implementation Details**:
-  - **Frontend**: `AdminLogin.tsx`, `AdminDashboard.tsx`, `VerifiedUpload.tsx`.
-  - **Workflow**: Admins can log in, view flagged discussions or uploaded resources, and Approve/Reject them.
-  - **Security**: Role-Based Access Control (RBAC) ensures only authorized users can access these routes.
-
-**[Insert Screenshot of Admin Dashboard]**
-_(Table view of pending posts/uploads with Approve/Reject buttons)_
-
----
-
-### Objective 5: Analytics & Progress Monitoring
-
-Visualizing the student's journey.
-
-- **Implementation Details**:
-  - **Frontend**: `Analytics.tsx`, `Dashboard.tsx`.
-  - **Libraries**: `recharts` for data visualization.
-  - **Metrics Tracked**:
-    - Weekly Goal Completion Rate.
-    - Mood Trends (Line Chart).
-    - Reflection Consistency (Activity Heatmap).
-
-**[Insert Screenshot of Analytics Dashboard]**
-_(Charts showing "Focus Time", "Mood History", and "Goal Completion" stats)_
+```
+┌──────────────────────────────────┐
+│        Vercel (Frontend)         │
+│  React + Vite + shadcn/ui        │
+│                                  │
+│  Pages: Chat, Suggestions,       │
+│         Dashboard, Admin         │
+│                                  │
+│  AppContext → api/*.ts ──────────┼──── HTTPS/JSON ─────┐
+└──────────────────────────────────┘                      │
+                                                          ▼
+                                         ┌─────────────────────────────┐
+                                         │   Leapcell (Backend)        │
+                                         │   Express.js Server         │
+                                         │                             │
+                                         │   Routes → Controllers      │
+                                         │       ↓           ↓         │
+                                         │   Groq API    MongoDB Atlas │
+                                         └─────────────────────────────┘
+                                                    ↑
+                                         Firebase Auth (token verify)
+```
 
 ---
 
-## 5. Conclusion
+## 4. Frontend Documentation
 
-The **LifePath Bot** successfully addresses the need for a personalized, privacy-conscious student companion. By implementing a custom **SLM architecture**, we have met the requirement for an API-free, low-latency solution that provides accurate, citation-backed answers from student materials. The integration of goal tracking, reflection, and multi-agent support creates a holistic ecosystem for student success.
+**Local Path:** `e:\lifepathbot-frontend`
+**Entry:** `src/main.tsx` → `src/App.tsx`
+
+### 4.1 Pages / Screens
+
+Located in `src/pages/`:
+
+#### `Chat.tsx` — AI Chat Interface
+- Renders the core dual-mode chatbot screen.
+- **General Mode**: Feeds recent goals, reflections, and peer suggestions as context to the AI.
+- **Study Mode**: Accepts PDF/DOCX/PPT uploads, parses them via the backend, and allows the student to ask questions about the material.
+- Features a persistent **left sidebar** with session history, selectable past chats, and a delete option.
+- **Session management**: Each conversation has a unique `sessionId` (timestamped) saved to MongoDB for continuity.
+- The "Synthesizing..." animation renders while the Groq API is processing.
+- **Key components used**: `ScrollArea`, `Badge`, `Select`, `Input`, `Button`.
+- **Key API calls**: `askChatbot()`, `saveChatMessage()`, `getUserSessions()`, `uploadMaterial()`.
+
+#### `Suggestions.tsx` — Community Hub
+- Displays approved peer suggestions in a **clean vertical stacked layout** (not a grid).
+- Each suggestion card shows: **Author name**, **Branch + Year**, **Category badge**, and the **suggestion body**.
+- Long suggestions are truncated to 3 lines with a **"Read More..."** toggle that expands inline.
+- Bulk-uploaded suggestions (from CSV) suppress the auto-generated title to avoid visual duplication.
+- **Voting**: Each user is limited to **1 vote per suggestion** (tracked in local state by suggestion ID).
+- Submit dialog allows logged-in students to post new suggestions (pending admin approval).
+- **Filter bar**: Clickable pill buttons to filter by category (Hackathons, Placements, Academics, etc.).
+- **Key API calls**: `getSuggestions()`, `createSuggestion()`.
+
+#### `AdminDashboard.tsx` — Admin Control Panel
+- Protected route, visible only to admin users.
+- **Tabs**: Users, Chat Logs, Pending Suggestions, Content Moderation, Bulk Upload.
+- **Bulk Upload**: Accepts `.csv` or `.xlsx` files from Google Forms exports. Parses specific columns:
+
+  | CSV Column | Mapped To |
+  |---|---|
+  | `Name` | `authorName` |
+  | `Department` | `branch` |
+  | `Year of Study` | `year` |
+  | `What type of guidance...` | `category` |
+  | `Your detailed suggestion/guidance` | `description` |
+
+- Admins can **Approve** or **Reject** pending suggestions.
+- **Key API calls**: `bulkCreateSuggestions()`, `getSuggestions('pending')`, `approveSuggestion()`, `rejectSuggestion()`.
+
+#### `Dashboard.tsx`, `Goals.tsx`, `Reflections.tsx`
+- Student-facing pages for tracking personal SMART goals and daily mood/accomplishment reflections.
+- Goals have a visual progress bar and completion toggle.
+- Reflections let students log mood and key accomplishments for the day.
+
+---
+
+### 4.2 State & API Layer
+
+#### `src/context/AppContext.tsx` — Global State (Central Nervous System)
+- Wraps the entire app.
+- Manages: `user` (Firebase profile + MongoDB sync), `goals`, `reflections`, `chatHistory`.
+- On login, calls `/api/users/sync` to upsert the Firebase user into MongoDB.
+
+#### `src/api/` — Network Bridge Module
+Each file is a thin wrapper around `fetch` pointing to `VITE_API_URL`:
+
+| File | Exports |
+|---|---|
+| `chat.ts` | `askChatbot`, `saveChatMessage`, `getUserSessions`, `getSessionMessages`, `deleteChatSession`, `uploadMaterial` |
+| `suggestions.ts` | `getSuggestions`, `createSuggestion`, `bulkCreateSuggestions`, `approveSuggestion`, `rejectSuggestion` |
+| `users.ts` | `syncUser`, `getAllUsers` |
+| `goals.ts` | `getGoals`, `createGoal`, `updateGoal`, `deleteGoal` |
+| `reflections.ts` | `getReflections`, `createReflection` |
+
+---
+
+### 4.3 Component System
+
+Located in `src/components/`. Uses **shadcn/ui** for consistency:
+
+| Component | Purpose |
+|---|---|
+| `ui/button.tsx` | Standardized button with variants (default, outline, ghost) |
+| `ui/card.tsx` | Container card used across all pages |
+| `ui/dialog.tsx` | Modal overlays (Submit Suggestion, etc.) |
+| `ui/badge.tsx` | Category/status labels |
+| `ui/scroll-area.tsx` | Custom scrollable containers |
+| `ui/select.tsx` | Dropdown selects (mode switcher, category picker) |
+| `ThemeToggle.tsx` | Dark/Light mode toggle |
+
+---
+
+### 4.4 Routing & Deployment Config
+
+#### `src/App.tsx`
+- Uses `react-router-dom` for client-side routing.
+- Routes: `/`, `/login`, `/dashboard`, `/chat`, `/suggestions`, `/goals`, `/reflections`, `/admin`.
+
+#### `vercel.json` — Fixes Client-Side Routing 404s
+```json
+{
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
+```
+Without this, refreshing `/chat` on Vercel returns a `404: NOT_FOUND` because Vercel treats it as a static file path. This rewrite routes all requests through the React app.
+
+---
+
+## 5. Backend Documentation
+
+**Local Path:** `e:\lifepathbot-backend`
+**Entry:** `server.js`
+
+### 5.1 Entry Point — `server.js`
+
+- Initializes Express, Socket.io, CORS, and connects to MongoDB.
+- **CORS config**: Uses `origin: true` (dynamic reflection) to support any origin — critical for Vercel ↔ Leapcell communication.
+- **Health check**: `GET /api/health` — returns server status and active endpoints. Used to verify deployment.
+- Registers all route modules.
+- Binds to `process.env.PORT` (managed by Leapcell dynamically).
+
+---
+
+### 5.2 Routing Module (`src/routes/`)
+
+Acts as the URL switchboard — maps incoming API requests to the right controller function.
+
+| Route File | Prefix | Purpose |
+|---|---|---|
+| `chatRoutes.js` | `/api/chat` | Chat sessions, history, AI ask, PDF upload |
+| `suggestionRoutes.js` | `/api/suggestions` | Get, create, bulk create, approve/reject |
+| `userRoutes.js` | `/api/users` | Sync Firebase user, get all users |
+| `goalRoutes.js` | `/api/goals` | CRUD for student goals |
+| `reflectionRoutes.js` | `/api/reflections` | CRUD for daily reflections |
+| `questionRoutes.js` | `/api/questions` | Community Q&A |
+
+---
+
+### 5.3 Controller Module (`src/controllers/`)
+
+The "Brain" — contains all business logic.
+
+#### `chatController.js` — AI & RAG Engine
+- **`askAI(req, res)`**: Core AI function.
+  1. Receives `{ message, context }` from the frontend.
+  2. Builds a structured system prompt including user profile, goals, reflections, and peer suggestions.
+  3. Calls the **Groq API** (`groq.chat.completions.create`) with `llama-3.3-70b-versatile`.
+  4. Returns the AI's response text to the frontend via JSON.
+- **`uploadMaterial(req, res)`**: PDF/document RAG handler.
+  1. Receives the uploaded file via `multer` (stored in memory, not on disk).
+  2. Parses text from PDF using `pdfjs-dist` (or raw buffer for other formats).
+  3. Chunks the text and stores it in a temporary in-memory map keyed to the session.
+  4. Subsequent `/ask` calls inject this chunked text as additional context.
+- **`getSessions`, `getSessionMessages`, `deleteSession`**: CRUD for persisted chat sessions in MongoDB.
+
+#### `suggestionController.js` — Suggestion Logic
+- **`bulkCreate(req, res)`**: Accepts an array of suggestion objects from the Admin Dashboard's CSV parser. Bulk-inserts them into MongoDB with `status: 'pending'`.
+- **`approveSuggestion`**: Updates `status` to `'approved'` so it appears publicly.
+- **`getSuggestions`**: Returns suggestions filtered by status (defaults to `'approved'` for public view).
+
+#### `userController.js`
+- **`syncUser`**: Upserts a user from Firebase into MongoDB on every login. Creates the record if new, updates `name`/`email` if existing.
+- **`getAllUsers`**: Returns all registered users for the Admin Dashboard.
+
+---
+
+### 5.4 Database Schema Module (`src/models/`)
+
+All schemas defined with Mongoose. Every document gets `createdAt`/`updatedAt` via `{ timestamps: true }`.
+
+#### `User.js`
+```js
+{
+  firebaseUid: String (unique, required),
+  name: String,
+  email: String,
+  role: String (default: 'student'),
+  branch: String,
+  year: String,
+  profilePic: String
+}
+```
+
+#### `Suggestion.js`
+```js
+{
+  firebaseUid: String,
+  authorName: String,
+  title: String,
+  description: String (required),
+  category: String,
+  branch: String,
+  year: String,
+  tags: [String],
+  upvotes: Number (default: 0),
+  status: String (default: 'pending')  // 'pending' | 'approved' | 'rejected'
+}
+```
+
+#### `Chat.js`
+```js
+{
+  firebaseUid: String,
+  userName: String,
+  sessionId: String,
+  role: String,       // 'user' | 'bot'
+  text: String,
+  agentType: String   // 'general' | 'study'
+}
+```
+
+#### `Goal.js`
+```js
+{
+  firebaseUid: String,
+  title: String,
+  description: String,
+  progress: Number (0–100),
+  completed: Boolean
+}
+```
+
+#### `Reflection.js`
+```js
+{
+  firebaseUid: String,
+  mood: String,
+  accomplishments: String,
+  challenges: String,
+  nextSteps: String
+}
+```
+
+---
+
+### 5.5 Config Module (`src/config/`)
+
+#### `db.js` — MongoDB Connection
+- Uses `mongoose.connect(process.env.MONGO_URI)`.
+- **Does NOT call `process.exit(1)` on failure** — this was intentionally removed to prevent Leapcell containers from crashing. Instead, it logs the error and allows the health check endpoint to remain accessible.
+
+---
+
+## 6. API Reference
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/health` | Server health check |
+| POST | `/api/users/sync` | Firebase → MongoDB user sync |
+| GET | `/api/users` | Get all users (admin) |
+| POST | `/api/chat/ask` | Send message, get AI response |
+| POST | `/api/chat/upload-material` | Upload study PDF/doc |
+| GET | `/api/chat/sessions/:uid` | Get all chat sessions for a user |
+| GET | `/api/chat/sessions/:sessionId/messages` | Get all messages in a session |
+| DELETE | `/api/chat/sessions/:sessionId` | Delete a session |
+| GET | `/api/suggestions` | Get approved suggestions |
+| POST | `/api/suggestions` | Create a new suggestion |
+| POST | `/api/suggestions/bulk` | Bulk create (admin CSV upload) |
+| PATCH | `/api/suggestions/:id/approve` | Approve a suggestion |
+| PATCH | `/api/suggestions/:id/reject` | Reject a suggestion |
+| GET | `/api/goals/:uid` | Get goals for a user |
+| POST | `/api/goals` | Create a goal |
+| PATCH | `/api/goals/:id` | Update goal progress |
+| DELETE | `/api/goals/:id` | Delete a goal |
+| GET | `/api/reflections/:uid` | Get reflections for a user |
+| POST | `/api/reflections` | Create a reflection |
+
+---
+
+## 7. Features
+
+### AI Chatbot (Dual-Mode)
+- **General Mode**: Acts as a peer mentor. Pulls the student's goals, reflections, and community suggestions to give personalized, campus-aware guidance.
+- **Study Mode**: Accepts file uploads (PDF, DOCX, PPT). Parses and stores text in memory. Answers questions grounded strictly in the uploaded material.
+- AI model is fully white-labeled — no AI provider name is shown to students.
+
+### Community Hub
+- Students and seniors can submit peer suggestions by category.
+- All submissions are **pending by default** — admins must approve before public display.
+- Stacked vertical layout with truncated descriptions and inline **Read More** expansion.
+- **1 vote per suggestion per user** (enforced on the frontend per session).
+
+### Admin Dashboard
+- **Bulk CSV/XLSX Import** from Google Forms exports.
+- User management table.
+- Suggestion moderation (approve/reject).
+- Chat log viewer for monitoring AI interactions.
+
+### Goal & Reflection Module
+- Students set SMART goals with a progress slider (0–100%).
+- Daily reflections capture mood, accomplishments, challenges, and next steps.
+- Both modules feed context to the AI for more personalized responses.
+
+---
+
+## 8. Environment Variables
+
+### Backend (Leapcell Dashboard)
+| Variable | Description |
+|---|---|
+| `MONGO_URI` | MongoDB Atlas connection string |
+| `GROQ_API_KEY` | Groq API authentication key |
+| `PORT` | Managed automatically by Leapcell |
+
+### Frontend (Vercel Dashboard)
+| Variable | Description |
+|---|---|
+| `VITE_API_URL` | Full URL of the Leapcell backend |
+| `VITE_FIREBASE_API_KEY` | Firebase project API key |
+| `VITE_FIREBASE_AUTH_DOMAIN` | Firebase auth domain |
+| `VITE_FIREBASE_PROJECT_ID` | Firebase project ID |
+
+---
+
+## 9. Deployment Guide
+
+### Backend → Leapcell
+1. Make code changes in `e:\lifepathbot-backend`.
+2. Run:
+   ```bash
+   git add .
+   git commit -m "your message"
+   git push origin main
+   ```
+3. Go to the **Leapcell Dashboard** → click **Redeploy**.
+4. Monitor the build logs. A healthy startup looks like:
+   ```
+   Server running on port 8080
+   MongoDB connected
+   ```
+
+> ⚠️ **MongoDB Atlas Network Access**: You must whitelist `0.0.0.0/0` under **Security → Network Access** on MongoDB Atlas, or Leapcell's dynamic IP will be blocked, causing all `/api/*` routes to return `500`.
+
+### Frontend → Vercel
+1. Make code changes in `e:\lifepathbot-frontend`.
+2. Run:
+   ```bash
+   git add .
+   git commit -m "your message"
+   git push origin main
+   ```
+3. Vercel **auto-deploys** within ~60 seconds. No manual trigger needed.
+4. Hard-refresh your browser (`Ctrl + F5`) to clear cached assets.
+
+---
+
+## 10. Troubleshooting
+
+| Symptom | Root Cause | Fix |
+|---|---|---|
+| `500 Internal Server Error` on all API calls | MongoDB Atlas blocking Leapcell IP | Whitelist `0.0.0.0/0` in Atlas Network Access |
+| `404: NOT_FOUND` on page refresh in browser | Vercel treating React routes as file paths | Already fixed via `vercel.json` rewrites |
+| `AI connection failed` toast in chat | Groq API key missing or backend crashed | Check Leapcell env vars and runtime logs |
+| `auth/invalid-credential` on login | Wrong email/password entered | Use correct credentials or Google Sign-In |
+| Bulk upload shows `No valid suggestions found` | CSV column names don't match expected headers | Ensure file uses exact Google Forms column names |
+| Session badge showing raw numbers on chat screen | Old cached frontend build | Hard refresh (`Ctrl + F5`) to clear cache |
