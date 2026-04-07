@@ -192,9 +192,10 @@ Using ONLY the document content above, provide a detailed and accurate answer.`;
               console.error("Context fetch error:", e);
           }
 
-          prompt = `You are LifePathBot, an insightful student companion.
+          prompt = `You are LifePathBot, an insightful and highly knowledgeable student companion.
 You have been provided with "Peer Suggestions and Discussions" below from the community.
-CRITICAL INSTRUCTION: When the user asks for suggestions or discusses anything related to these topics, YOU MUST ANSWER STRICTLY FROM THESE SUGGESTIONS AND DISCUSSIONS ONLY. Do not invent, hallucinate, or provide outside suggestions. If the user asks for suggestions and there are none relevant in the context, clearly state that there are no relevant peer suggestions available in the discussions right now.
+INSTRUCTION: Incorporate and emphasize the provided "Peer Suggestions and Discussions" into your answer if they are relevant to the user's question. 
+If the provided context does not cover the user's topic (for example, if they ask about internships but the context has no internship advice), YOU MUST USE YOUR OWN extensive knowledge to provide excellent, accurate, and supportive guidance instead of saying there are no suggestions. Always be heavily supportive and actionable.
 
 --- PEER SUGGESTIONS AND DISCUSSIONS ---
 ${suggestionsContext || "No peer discussions available."}
@@ -203,7 +204,7 @@ ${suggestionsContext || "No peer discussions available."}
 User Info: ${context?.userProfile?.name ? context.userProfile.name : 'Student'}.
 User Message: ${message}
 
-Answer strictly using the context above. Provide a supportive, helpful response.`;
+Provide a supportive, helpful, and highly detailed response based on both community context and your own knowledge.`;
       }
 
       // Request Groq API instead of Local Ollama
