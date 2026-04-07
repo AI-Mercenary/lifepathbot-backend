@@ -175,8 +175,8 @@ Using ONLY the document content above, provide a detailed and accurate answer.`;
               const suggestionsCol = db.collection('suggestions');
               const questionsCol = db.collection('questions');
               
-              let suggestions = await suggestionsCol.find({status: 'approved'}).sort({createdAt: -1}).limit(5).toArray();
-              let queries = await questionsCol.find({}).sort({createdAt: -1}).limit(5).toArray();
+              let suggestions = await suggestionsCol.find({status: 'approved'}).sort({createdAt: -1}).limit(30).toArray();
+              let queries = await questionsCol.find({}).sort({createdAt: -1}).limit(15).toArray();
 
               let peerContext = [];
               if(suggestions && suggestions.length > 0) {
