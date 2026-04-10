@@ -175,17 +175,98 @@ Using ONLY the document content above, provide a detailed and accurate answer.`;
               const suggestionsCol = db.collection('suggestions');
               const questionsCol = db.collection('questions');
               
-              let suggestions = await suggestionsCol.find({status: 'approved'}).sort({createdAt: -1}).limit(30).toArray();
-              let queries = await questionsCol.find({}).sort({createdAt: -1}).limit(15).toArray();
+              let allSuggestions = await suggestionsCol.find({status: 'approved'}).toArray();
+              let allQueries = await questionsCol.find({}).toArray();
+
+              // Contextual Clustering & Advanced Keyword Overlapping
+              const queryWords = message.toLowerCase().split(/[\s,.-]+/).filter(w => w.length > 2);
+              
+              // Define topic clusters for semantic/contextual matching
+              const topicContexts = {
+                  academic: ['exam', 'study', 'marks', 'grade', 'syllabus', 'score', 'cgpa', 'preparation', 'pass', 'fail', 'assignment', 'college', 'subject', 'theory', 'notes'],
+                  placement: ['placement', 'internship', 'interview', 'job', 'resume', 'skills', 'career', 'corporate', 'offer', 'aptitude', 'company', 'hiring', 'recruitment', 'hr'],
+                  technology: ['ml', 'ai', 'cloud', 'data', 'web', 'app', 'react', 'node', 'python', 'java', 'programming', 'software', 'machine learning', 'artificial intelligence', 'dsa', 'algorithm', 'tech', 'coding', 'project']
+              };
+
+              // Identify which broad contexts the user's question belongs to
+              let queryContexts = [];
+              for (const [ctx, words] of Object.entries(topicContexts)) {
+                  if (queryWords.some(qw => words.includes(qw)) || message.toLowerCase().includes(ctx)) {
+                      queryContexts.push(ctx);
+                  }
+              }
+              
+              const scoreItem = (item, fieldsToSearch) => {
+                  let score = 0;
+                  const itemText = fieldsToSearch.map(f => {
+                      let val = item[f];
+                      if (Array.isArray(val)) return val.join(' ');
+                      return (val || '').toString();
+                  }).join(' ').toLowerCase();
+
+                  // 1. Direct Keyword Match (minor points)
+                  queryWords.forEach(qw => {
+                      if (itemText.includes(qw)) score += 2;
+                  });
+
+                  // 2. Identify the broad context of the suggestion item
+                  let itemContexts = [];
+                  for (const [ctx, words] of Object.entries(topicContexts)) {
+                      // Check if item contains contextual keywords, OR if its explicit DB category matches
+                      if (words.some(w => itemText.includes(w)) || (item.category && item.category.toLowerCase().includes(ctx))) {
+                          itemContexts.push(ctx);
+                      }
+                  }
+
+                  // 3. MAIN CONTEXT BOOSTING: If the query and item share a broad context, give a massive score boost
+                  queryContexts.forEach(qc => {
+                      if (itemContexts.includes(qc)) {
+                          score += 15; // Context matching takes extremely high priority
+                      }
+                  });
+
+                  // Bonus for full phrase exact matches
+                  if (itemText.includes(message.toLowerCase())) score += 10;
+
+                  return score;
+              };
+
+              let scoredSuggestions = allSuggestions.map(s => ({ ...s, score: scoreItem(s, ['title', 'description', 'category', 'tags']) }));
+              scoredSuggestions.sort((a, b) => {
+                  if (b.score !== a.score) return b.score - a.score;
+                  return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+              });
+
+              let suggestions;
+              // If query has specific words and there's a match, use highest matches
+              if (scoredSuggestions.length > 0 && scoredSuggestions[0].score > 0) {
+                  suggestions = scoredSuggestions.filter(s => s.score > 0).slice(0, 15);
+              } else {
+                  // Fallback to recent suggestions if no match
+                  suggestions = scoredSuggestions.slice(0, 10);
+              }
+
+              let scoredQueries = allQueries.map(q => ({ ...q, score: scoreItem(q, ['body', 'category']) }));
+              scoredQueries.sort((a, b) => {
+                  if (b.score !== a.score) return b.score - a.score;
+                  return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+              });
+              
+              let queries;
+              if (scoredQueries.length > 0 && scoredQueries[0].score > 0) {
+                  queries = scoredQueries.filter(q => q.score > 0).slice(0, 10);
+              } else {
+                  queries = scoredQueries.slice(0, 8);
+              }
 
               let peerContext = [];
               if(suggestions && suggestions.length > 0) {
-                  peerContext.push("Peer Suggestions:");
-                  suggestions.forEach(s => peerContext.push(`- ${s.title}: ${s.description} (Category: ${s.category})`));
+                  peerContext.push("Selected Peer Suggestions (Highly Relevant to Context):");
+                  suggestions.forEach(s => peerContext.push(`- [${s.category}] ${s.title}: ${s.description}`));
               }
               if(queries && queries.length > 0) {
-                  peerContext.push("Recent Peer Discussions:");
-                  queries.forEach(q => peerContext.push(`- Question: ${q.body} (Category: ${q.category})`));
+                  peerContext.push("Selected Peer Discussions (Highly Relevant to Context):");
+                  queries.forEach(q => peerContext.push(`- [${q.category}] Question: ${q.body}`));
               }
               suggestionsContext = peerContext.join('\n');
           } catch (e) {
